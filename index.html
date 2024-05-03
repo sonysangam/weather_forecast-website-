@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter city name" spellcheck="false">
+            <button><img src="./images/search.png"></button>
+        </div>
+        <div class="weather">
+            <img src="./images/rain.png" class="weather-icon">
+            <h1 class="temp">26°C</h1>
+            <h2 class="city">Bangalore</h2>
+            <div class="details">
+                <div class="col">
+                    <img src="./images/humidity.png">
+                    <div>
+                        <p class="humidity">44%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="./images/wind.png">
+                    <div>
+                        <p class="wind">5.14 km/hr</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="forecast">
+            <h2>5-Day Forecast</h2>
+            <div class="forecast-days">
+                <!-- Day 1 -->
+                <div class="forecast-day">
+                    <p class="day">Monday</p>
+                    <img src="./images/clouds.png" class="forecast-icon">
+                    <p class="temp">25°C</p>
+                </div>
+                <!-- Day 2 -->
+                <div class="forecast-day">
+                    <p class="day">Tuesday</p>
+                    <img src="./images/clear.png" class="forecast-icon">
+                    <p class="temp">28°C</p>
+                </div>
+                <!-- Day 3 -->
+                <div class="forecast-day">
+                    <p class="day">Wednesday</p>
+                    <img src="./images/rain.png" class="forecast-icon">
+                    <p class="temp">22°C</p>
+                </div>
+                <!-- Day 4 -->
+                <div class="forecast-day">
+                    <p class="day">Thursday</p>
+                    <img src="./images/drizzle.png" class="forecast-icon">
+                    <p class="temp">20°C</p>
+                </div>
+                <!-- Day 5 -->
+                <div class="forecast-day">
+                    <p class="day">Friday</p>
+                    <img src="./images/mist.png" class="forecast-icon">
+                    <p class="temp">18°C</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Your existing JavaScript code for fetching and displaying weather data
+        const apiKey = '9b6160b4513d84547944aec79b10e435';  // Replace with your actual API key
+const apiUrl = 'https://api.openweathermap.org/data/2.5/forecast?units=metrics&q=';  // Replace with the actual API endpoint
+
+const searchBox = document.querySelector('.search input');
+const searchBtn = document.querySelector('.search button');
+const weatherIcon = document.querySelector('.weather-icon');
+const forecastDaysContainer = document.querySelector('.forecast-days');
+
+async function checkWeather(city) {
+    try {
+        const response = await fetch(apiUrl + city +`&appid=${apiKey}`);
+        const data = await response.json();
+
+        console.log(data);
+
+        // Assuming data.list is an array of forecasts for 5 days
+        const fiveDayForecast = data.list.slice(0, 5);
+
+        // Display today's weather
+        document.querySelector('.city').innerHTML = data.city.name;
+        document.querySelector('.temp').innerHTML = Math.round(fiveDayForecast[0].main.temp - 273.15).toFixed(1) + '°C';
+        document.querySelector('.humidity').innerHTML = fiveDayForecast[0].main.humidity + '%';
+        document.querySelector('.wind').innerHTML = fiveDayForecast[0].wind.speed + ' km/hr';
+
+        // Display weather icon based on the first day's weather
+        const weatherMain = fiveDayForecast[0].weather[0].main;
+        setWeatherIcon(weatherMain);
+
+        // Display 5-day forecast
+        displayForecast(fiveDayForecast);
+    } catch (error) {
+        console.error('Error fetching weather data:', error);
+    }
+}
+
+function setWeatherIcon(weatherMain) {
+    // Your existing code for setting the weather icon
+    // ...
+
+    // For example:
+    if (weatherMain === 'Clouds') {
+        weatherIcon.src = './images/clouds.png';
+    } else if (weatherMain === 'Clear') {
+        weatherIcon.src = './images/clear.png';
+    }
+    else if(weatherMain=="Rain")
+            {
+               weatherIcon.src="./images/rain.png"
+            }
+            else if(weatherMain=="Drizzle")
+            {
+               weatherIcon.src="./images/drizzle.png"
+            }
+            else if(weatherMain=="Mist")
+            {
+               weatherIcon.src="./images/mist.png"
+            }
+            else if(weatherMain=="Snow")
+            {
+               weatherIcon.src="./images/snow.png"
+            }
+            else if(weatherMain=="Wind")
+            {
+               weatherIcon.src="./images/wind.png"
+            }
+    // Add more conditions as needed
+}
+
+function displayForecast(fiveDayForecast) {
+    forecastDaysContainer.innerHTML = ''; // Clear existing content
+
+    fiveDayForecast.forEach((day, index) => {
+        const forecastDayElement = document.createElement('div');
+        forecastDayElement.classList.add('forecast-day');
+
+        const dayName = getDayName(index);
+        const temperature = Math.round(day.main.temp-273.15).toFixed(1) + '°C';
+        const iconUrl = getWeatherIconUrl(day.weather[0].main);
+
+        forecastDayElement.innerHTML = `
+            <p class="day">${dayName}</p>
+            <img src="${iconUrl}" class="forecast-icon">
+            <p class="temp">${temperature}</p>
+        `;
+
+        forecastDaysContainer.appendChild(forecastDayElement);
+    });
+}
+
+function getDayName(index) {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const today = new Date().getDay();
+    const dayIndex = (today + index) % 7; // Adjust for days beyond the current week
+    return days[dayIndex];
+}
+
+function getWeatherIconUrl(weatherMain) {
+    // Your existing code for getting the weather icon URL
+    // ...
+
+    // For example:
+    switch (weatherMain) {
+        case 'Clouds':
+            return './images/clouds.png';
+        case 'Clear':
+            return './images/clear.png';
+        case 'Rain':
+            return './images/rain.png';
+        case 'Drizzle':
+            return './images/drizzle.png';
+        case 'Mist':
+            return './images/mist.png';
+        case 'Snow':
+            return './images/snow.png';
+        case 'Wind':
+            return './images/wind.png';
+        // Add more cases as needed
+        default:
+            return './images/default.png';
+    }
+}
+
+searchBtn.addEventListener('click', () => {
+    checkWeather(searchBox.value);
+})
+
+    </script>
+</body>
+</html>
